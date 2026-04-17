@@ -42,32 +42,38 @@ navigate to it in cmd:
 C:\airflow-class>
 
 3. Run this command to install the docker-compose.yaml
-curl -LfO https://airflow.apache.org/docs/apache-airflow/2.8.1/docker-compose.yaml
 
-4. Open the .yaml file and change the following:
+		curl -LfO https://airflow.apache.org/docs/apache-airflow/2.8.1/docker-compose.yaml
+
+5. Open the .yaml file and change the following:
+
 "AIRFLOW__CORE__LOAD_EXAMPLES: 'false'" (from true to false)
 
 and modify this segment from this:
-  # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
+
+  	# and uncomment the "build" line below, Then run `docker-compose build` to build the images.
     image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.8.1}
     # build: .
     environment:
     
 to this:
-  # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
+
+  	# and uncomment the "build" line below, Then run `docker-compose build` to build the images.
     #image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.8.1}
     build: .
     environment:
 
 5. the create the .env file with this command in cmd:
-echo AIRFLOW_UID=50000 > .env
+	
+		echo AIRFLOW_UID=50000 > .env
 
-6. make in the airflow-class folder 3 new folders called:  dags, logs, plugins
-7. copy the contents of the "airflow files" folder into C:\airflow-class
+7. make in the airflow-class folder 3 new folders called:  dags, logs, plugins
+8. copy the contents of the "airflow files" folder into C:\airflow-class
 
-8. Then run in cmd:
-docker compose up airflow-init
-docker compose up
+9. Then run in cmd:
+
+		docker compose up airflow-init
+		docker compose up
 
 note: if you have a previous installation of Airflow this will not work due to some critical config changes.
 
