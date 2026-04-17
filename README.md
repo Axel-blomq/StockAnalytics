@@ -1,41 +1,37 @@
 # StockAnalytics
 Just some code for analysing stocks with Yfinance.
 
-# how to setup:
+# How to setup:
 open a command line inside the folder, and run the following:
 
-docker pull cassandra:latest
-docker network create cassandra-net
-docker run --rm -d --name cassandra-axel -p 9042:9042 --hostname cassandra-host --network cassandra-net cassandra
-docker cp "./data.cql" cassandra-axel:/data.cql
+	docker pull cassandra:latest 
+	docker network create cassandra-net
+	docker run --rm -d --name cassandra-axel -p 9042:9042 --hostname cassandra-host --network cassandra-net cassandra
+	docker cp "./data.cql" cassandra-axel:/data.cql
 
 wait until the Cassandra Database is fully up and running before doing the next command, you will get errors if it is not.
 
-docker exec cassandra-axel cqlsh -f /data.cql
+	docker exec cassandra-axel cqlsh -f /data.cql
 
-optional:
+optional, to verify the server is up and running:
+
 	docker run --rm -it --network cassandra-net nuvo/docker-cqlsh cqlsh cassandra-axel 9042 --cqlversion=3.4.7
-
 	SELECT * FROM stocks.companies;
-	to verify the TEST data exists.
-	then write "exit" to get back to the regular CMD.
+	
+then write "exit" to get back to the regular CMD.
 
 the venv for the streamlit dash needs python Version 3.10 and OpenJDK version 17. 
 
-in Conda this can be done by creating a vm with a custom python version like so:
-conda create -n streamlit-env python=3.10
+commands for Conda:
 
-the go into the Venv:
-conda activate streamlit-env
+	conda create -n streamlit-env python=3.10
+	conda activate streamlit-env
+	conda install -c conda-forge openjdk=17
+	pip install -r requirements.txt
 
-and install openJDK 17 inside the venv with:
-conda install -c conda-forge openjdk=17
+Then you can start the program with: 
 
-then run:
-pip install -r requirements.txt
-
-Then simply do: 
-streamlit run Dashboard.py
+	streamlit run Dashboard.py
 
 # Airflow installation instructions:
 1. Open docker desktop
@@ -76,10 +72,8 @@ docker compose up
 note: if you have a previous installation of Airflow this will not work due to some critical config changes.
 
 10. when the web UI launches, login with username: airflow || password: airflow
-it might take a bit for the Dag to show in airflow, but then it is up and running.
-Then just toggle the Dag on and click the trigger button to activate it.
 
-You can monitor it from the graph UI.
+it might take a bit for the Dag to show in airflow, but then it is up and running. Then just toggle the Dag on and click the trigger button to activate it. You can monitor it from the graph UI.
 
 
 
