@@ -51,7 +51,7 @@ def process_partition(company_ids):
                     #then update it, otherwise skip.
                     continue
 
-            #checks if Yfinance has this company.
+            #check if Yfinance has this company.
             if not comp_exists(compID):
                 continue
             
@@ -84,6 +84,6 @@ def process_partition(company_ids):
     cluster.shutdown()
 
 #this is here in case someone wants to try to run this file by CMD directly.
-#takes in a py list of company shorthands
+#takes in a py list of company shorthands and puts them into the DB or updates them.
 def main(string:str):
     process_partition(string)
