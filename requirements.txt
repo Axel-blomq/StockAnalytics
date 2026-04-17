@@ -1,0 +1,7 @@
+pyspark
+grpcio-status
+zstandard
+yfinance
+streamlit
+cassandra-driver
+prophet
