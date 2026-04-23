@@ -63,6 +63,8 @@ def process_partition(company_ids):
             month = data.history(period='1mo')
             year = data.history(period='1y')
             day = data.history(period='3d')
+            
+            # custom = data.history(start="", end="")
 
             #then put all the gathered data that we are interested in, into the DB
             session.execute(insert_stmt, (

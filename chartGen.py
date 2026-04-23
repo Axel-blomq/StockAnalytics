@@ -3,38 +3,7 @@ import pandas as pd
 import numpy as np
 from prophet import Prophet
 
-def modelChartGen(compID:str, model, session):
-    try:
-        #grab the data
-        query = "SELECT company_info FROM companies WHERE company_id = %s"
-        row = session.execute(query, (compID,)).one()
-
-        #then using the already existing model, generate a chart
-        future_pd_1 = model.make_future_dataframe(periods=90,freq='d',include_history=False)
-        forecast_pd_1 = model.predict(future_pd_1)
-        fig1 = model.plot(forecast_pd_1)
-
-        compInfoPD = pd.read_json(row.company_info)
-
-        #write some fun info about the company.
-        name = compInfoPD[['longName']].iloc[0][0]
-        #convert some numbers into percentages.
-        oppMargins =  round((float(compInfoPD[['operatingMargins']].iloc[0][0]) *100),2)
-        grossMargins = round((float(compInfoPD[['grossMargins']].iloc[0][0])*100),2)
-        dte = round(float(compInfoPD[['debtToEquity']].iloc[0][0]),2)
-        st.subheader(f"{name}")
-        st.pyplot(fig1) 
-        st.write(f"operating margins: {oppMargins}% | gross margins: {grossMargins}% | Debt to Equity ratio: {dte}%")
-        st.markdown("---")
-    except ValueError:
-       st.error(f"{compID} exists in database, but has bad JSON data")
-    except KeyError:
-        st.error(f"{compID} exists in database, but missing critical data in the Yfinance API")
-    except Exception as e:
-        st.error(f"{compID} unnacounted for exception: {e}")  
-
-
-def ChartGen(compID:str, session):
+def ChartGenProphet(compID:str, session):
     try:
         #grab the companies DATA
         query = "SELECT * FROM companies WHERE company_id = %s"
@@ -85,3 +54,10 @@ def ChartGen(compID:str, session):
         st.error(f"{compID} exists in database, but missing data, skipping")
     except Exception as e:
         st.error(f"{compID} unnacounted for exception: {e}") 
+
+
+#TODO: ARIMA chart generator, P Q testing on ARIMA, 
+#TODO: XGBoost chart generator, 
+#TODO: "trend decompose" chart generator
+#TODO: basis function for Arima, AIC score, SARIMA (seasonal).
+#TODO: check if stock is seasonal.

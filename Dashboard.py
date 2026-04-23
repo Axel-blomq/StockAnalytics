@@ -124,4 +124,4 @@ if st.button("Fetch Data"):
     for comp in userInputs:
         #decided to make the chart generation into a function for easier handling and more consistency across charts
         #also passing the Cassandra session variable into them to not create duplicate connections (saves on ram)
-        chartGen.ChartGen(comp, session)
+        chartGen.ChartGenProphet(comp, session)
