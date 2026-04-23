@@ -46,6 +46,9 @@ def ChartGen(compID:str, session):
             compYearDataPD = pd.read_json(row.company_year)
             compOpenPrices = compYearDataPD[['Open']]
             
+            #grab the volume of traded stocks on a particular day.
+            compVolumes = compYearDataPD[['Volume']]
+
             #reformat and create a column with dates for Prophet to latch onto.
             compOpenPrices = compOpenPrices.rename(columns={'Open': 'y'})
             compOpenPrices["ds"] = pd.date_range(end=pd.Timestamp.today().normalize(), periods=len(compOpenPrices), freq="D")
@@ -77,8 +80,8 @@ def ChartGen(compID:str, session):
             #inform the user that something was missing.
             st.error(f"{compID} does not exist in the Database, if you have tried to import it, it does not exist in the Yfinance API")
     except ValueError:
-       st.error(f"{compID} exists in database, but has bad JSON data")
+       st.error(f"{compID} exists in database, but has corrupt JSON data, skipping")
     except KeyError:
-        st.error(f"{compID} exists in database, but missing critical data in the Yfinance API")
+        st.error(f"{compID} exists in database, but missing data, skipping")
     except Exception as e:
         st.error(f"{compID} unnacounted for exception: {e}") 
