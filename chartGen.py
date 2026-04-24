@@ -15,7 +15,7 @@ def ChartGenProphet(compID:str, session):
             compYearDataPD = pd.read_json(row.company_year)
             compOpenPrices = compYearDataPD[['Open']]
             
-            #grab the volume of traded stocks on a particular day.
+            #grab the volume of traded stocks (unimplemented)
             compVolumes = compYearDataPD[['Volume']]
 
             #reformat and create a column with dates for Prophet to latch onto.
@@ -29,6 +29,8 @@ def ChartGenProphet(compID:str, session):
             #predict and plot.
             future_pd = model.make_future_dataframe(periods=90,freq='d',include_history=False)
             forecast_pd = model.predict(future_pd)
+
+
             fig1 = model.plot(forecast_pd)
 
             #find and show info about the company.
@@ -46,8 +48,7 @@ def ChartGenProphet(compID:str, session):
             st.write(f"operating margins: {oppMargins}% | gross margins: {grossMargins}% | Debt to Equity ratio: {dte}%")
             st.markdown("---")
         else:
-            #inform the user that something was missing.
-            st.error(f"{compID} does not exist in the Database, if you have tried to import it, it does not exist in the Yfinance API")
+            st.error(f"{compID} does not exist in the Database.")
     except ValueError:
        st.error(f"{compID} exists in database, but has corrupt JSON data, skipping")
     except KeyError:
@@ -57,7 +58,8 @@ def ChartGenProphet(compID:str, session):
 
 
 #TODO: ARIMA chart generator, P Q testing on ARIMA, 
-#TODO: XGBoost chart generator, 
+#TODO: XGBoost chart generator, applied to prophet -!-!-!-!-
 #TODO: "trend decompose" chart generator
 #TODO: basis function for Arima, AIC score, SARIMA (seasonal).
 #TODO: check if stock is seasonal.
+#TODO: user input, and server integration -!-!-!-!-

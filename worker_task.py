@@ -22,8 +22,8 @@ def process_partition(company_ids):
     #prepare statement for putting data into the DB
     insert_stmt = session.prepare("""
         INSERT INTO companies
-        (company_ID, company_Info, company_Year, company_Month, company_Day, last_update_timestamp)
-        VALUES (?, ?, ?, ?, ?, ?)
+        (company_ID, company_Info, company_Historic, last_update_timestamp)
+        VALUES (?, ?, ?, ?)
     """)
 
     #establish what time it is.
@@ -31,25 +31,27 @@ def process_partition(company_ids):
     yesterday = now - timedelta(days=1)
 
     #for each task given to the worker.
-    for compID in company_ids:
+    for compID, start_date, end_date in company_ids:
         try:
+            #commmenting out this checker, since there is no way to easily check if the user entered a different date
+
             # check if the company is already in the DB
-            query = """
-            SELECT company_id, last_update_timestamp
-            FROM companies
-            WHERE company_id = %s
-            """
+            #query = """
+            #SELECT company_id, last_update_timestamp
+            #FROM companies
+            #WHERE company_id = %s
+            # """
 
-            rows = session.execute(query, (compID,))
-            rows_list = list(rows)
-
+            #rows = session.execute(query, (compID,))
+            #rows_list = list(rows)
+            
             #if the company already Exists.
-            if len(rows_list) > 0:
-                last_update = rows_list[0].last_update_timestamp
-                #If the timestamp is OLDER than 1 day.
-                if last_update and last_update > yesterday:
-                    #then update it, otherwise skip.
-                    continue
+            #if len(rows_list) > 0:
+             #   last_update = rows_list[0].last_update_timestamp
+             #   #If the timestamp is OLDER than 1 day.
+             #   if last_update and last_update > yesterday:
+             #       #then update it, otherwise skip.
+             #       continue
 
             #check if Yfinance has this company.
             if not comp_exists(compID):
@@ -60,19 +62,13 @@ def process_partition(company_ids):
 
             info = pd.json_normalize(data.info)
 
-            month = data.history(period='1mo')
-            year = data.history(period='1y')
-            day = data.history(period='3d')
-            
-            # custom = data.history(start="", end="")
+            historic = data.history(start=start_date, end=end_date)
 
             #then put all the gathered data that we are interested in, into the DB
             session.execute(insert_stmt, (
                 compID,
                 info.to_json(),
-                year.to_json(orient="records"),
-                month.to_json(orient="records"),
-                day.to_json(orient="records"),
+                historic.to_json(orient="records"),
                 now
             ))
 

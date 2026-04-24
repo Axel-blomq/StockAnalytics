@@ -71,12 +71,16 @@ st.write("fill this field with the shorthands for any companies you wish to have
 st.write("example: AAPL,MSFT,K,DE. Press the button to insert data (run at least once to get initial data)")
 identifier = st.text_input('the companies you want included in the data', key="identifier")
 
+
+start_date = st.date_input('the start date for the data.', "01/01/23")
+end_date = st.date_input('the end date for the data.', "today")
+
 #when the button is clicked, run the code
 if st.button("Insert Data"):
     st.info("Processing.")
     compDF = None
     try:
-        #just a REALLY long list of companies so we have DATA to work with
+        #just a REALLY long list of companies so we have baseline data to work with
         companies = [
         "AAPL","MSFT","GOOG","AMZN","TSLA","NVDA","META","NFLX","INTC","AMD",
         "ORCL","IBM","ADBE","CRM","CSCO","QCOM","TXN","AVGO","MU","AMAT",
@@ -101,6 +105,12 @@ if st.button("Insert Data"):
         #grab the user inputted codes and add them to the list.
         userInputs = identifier.split(",")
         companies.extend(userInputs)
+
+        tasks = [(company, start_date, end_date) for company in companies]
+
+        # parallelize that instead
+        rdd = sc.parallelize(tasks, 5)
+        rdd.foreachPartition(worker_task.process_partition)
 
         #then assign 5 Spark workers to get the data...
         rdd = sc.parallelize(companies, 5)
