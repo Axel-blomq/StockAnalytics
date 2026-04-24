@@ -22,7 +22,7 @@ def process_partition(company_ids):
     #prepare statement for putting data into the DB
     insert_stmt = session.prepare("""
         INSERT INTO companies
-        (company_ID, company_Info, company_Historic, last_update_timestamp)
+        (company_ID, company_Info, company_Year, last_update_timestamp)
         VALUES (?, ?, ?, ?)
     """)
 

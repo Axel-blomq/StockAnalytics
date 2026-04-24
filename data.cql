@@ -6,7 +6,7 @@ CREATE KEYSPACE IF NOT EXISTS stocks WITH REPLICATION =
 CREATE TABLE IF NOT EXISTS stocks.companies (
     company_ID text PRIMARY KEY,
     company_Info text,
-    company_Historic text,
+    company_Year text,
     last_update_timestamp timestamp
 );
 
