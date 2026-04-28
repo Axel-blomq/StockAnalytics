@@ -124,12 +124,12 @@ grabber = st.text_input('the companies you want to get INFO about.', key="grabbe
 
 #when the button is clicked, run the code
 if st.button("Fetch Data"):
-
+    
     #grab the companies the uses DEMANDED be shown.
     userInputs = grabber.split(",")
 
     for comp in userInputs:
-
+        #made an adjustment to have this error checking OUTSIDE the functions instead of inside them
         try:
             # grab the companies DATA
             query = "SELECT * FROM companies WHERE company_id = %s"
@@ -144,6 +144,8 @@ if st.button("Fetch Data"):
                 chartGen.ChartGenProphetXGB(row)
                 st.write("Yealy seasonality")
                 chartGen.ChartGenSeasonal(row)
+                st.write("SARIMAX data... none for now")
+                #chartGen.ChartGenSARIMAX(row)
             else:
                 st.error(f"{comp} does not exist in the Database.")
 

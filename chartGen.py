@@ -5,6 +5,21 @@ from prophet import Prophet
 from xgboost import XGBRegressor
 from statsmodels.tsa.seasonal import seasonal_decompose
 import sklearn
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+
+#def ChartGenSARIMAX(row):
+#    try:
+#        # Load data
+#        compYearDataPD = pd.read_json(row.company_year)
+#        compOpenPrices = compYearDataPD[['Open']].copy()
+#
+#        model = SARIMAX(compOpenPrices['Open'], order=(0,1,1), seasonal_order=(0,1,1,252))
+#        results = model.fit()
+#        st.subheader(f"SARIMAX implementation")
+#        st.write(results)
+#        st.markdown("---")
+#    except Exception as e:
+#            st.error(f"SARIMAX unaccounted for exception: {e}")
 
 def ChartGenProphetXGB(row):
 
@@ -27,7 +42,7 @@ def ChartGenProphetXGB(row):
     y = df_ml["y"]
 
     # Train XGBoost
-    xgb_model = XGBRegressor(n_estimators=100,max_depth=3,learning_rate=0.1)
+    xgb_model = XGBRegressor(n_estimators=100,max_depth=5,learning_rate=0.1)
     xgb_model.fit(X, y)
 
     # Generate predictions for training data
@@ -86,7 +101,6 @@ def ChartGenProphetXGB(row):
         
 
 def ChartGenProphet(row):
-
     #first, grab the year data, only the Open column 
     compYearDataPD = pd.read_json(row.company_year)
     compOpenPrices = compYearDataPD[['Open']]
@@ -134,12 +148,12 @@ def ChartGenSeasonal(row):
     #check if there is a yearly seasonality
     result = seasonal_decompose(compOpenPrices['Open'], model='additive', period=252)
     priceplot = result.plot()
-    result = seasonal_decompose(compVolumes['Volume'], model='additive', period=252)
+    result = seasonal_decompose(compVolumes['Volume'], model='additive', period=20)
     volplot = result.plot()
     st.subheader(f"Seasonality over a year in stock price (if any):")
     st.pyplot(priceplot)
     st.markdown("---")
-    st.subheader(f"Seasonality over a year in stock trade volume (if any):")
+    st.subheader(f"Seasonality over a month in stock trade volume (if any):")
     st.pyplot(volplot)
     st.markdown("---")
         
