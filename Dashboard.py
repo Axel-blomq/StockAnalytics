@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import platform
+import datetime
 import sys
 import os
 from prophet import Prophet
@@ -71,8 +72,8 @@ st.write("fill this field with the shorthands for any companies you wish to have
 st.write("example: AAPL,MSFT,K,DE. Press the button to insert data (run at least once to get initial data)")
 identifier = st.text_input('the companies you want included in the data', key="identifier")
 
-
-start_date = st.date_input('the start date for the data.', "01/01/23")
+startdate_datetime = datetime.datetime(2023, 1, 1)
+start_date = st.date_input('the start date for the data.', startdate_datetime)
 end_date = st.date_input('the end date for the data.', "today")
 
 #when the button is clicked, run the code
@@ -108,12 +109,8 @@ if st.button("Insert Data"):
 
         tasks = [(company, start_date, end_date) for company in companies]
 
-        # parallelize that instead
-        rdd = sc.parallelize(tasks, 5)
-        rdd.foreachPartition(worker_task.process_partition)
-
         #then assign 5 Spark workers to get the data...
-        rdd = sc.parallelize(companies, 5)
+        rdd = sc.parallelize(tasks, 5)
         rdd.foreachPartition(worker_task.process_partition)
         #sucess message
         st.success("sucessfully put data into the DB, now use the next row to show some of it")
@@ -132,6 +129,27 @@ if st.button("Fetch Data"):
     userInputs = grabber.split(",")
 
     for comp in userInputs:
-        #decided to make the chart generation into a function for easier handling and more consistency across charts
-        #also passing the Cassandra session variable into them to not create duplicate connections (saves on ram)
-        chartGen.ChartGenProphet(comp, session)
+
+        try:
+            # grab the companies DATA
+            query = "SELECT * FROM companies WHERE company_id = %s"
+            row = session.execute(query, (comp,)).one()
+
+            if row:
+                #decided to make the chart generation into a function for easier handling and more consistency across charts
+                #also passing the Cassandra session variable into them to not create duplicate connections (saves on ram)
+                st.write("Prophet Prediction")
+                chartGen.ChartGenProphet(row)
+                st.write("Prophet with XGBoost")
+                chartGen.ChartGenProphetXGB(row)
+                st.write("Yealy seasonality")
+                chartGen.ChartGenSeasonal(row)
+            else:
+                st.error(f"{comp} does not exist in the Database.")
+
+        except ValueError:
+            st.error(f"{comp} exists in database, but has corrupt JSON data, skipping")
+        except KeyError:
+            st.error(f"{comp} exists in database, but missing data, skipping")
+        except Exception as e:
+            st.error(f"{comp} unaccounted for exception: {e}")

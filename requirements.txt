@@ -6,3 +6,5 @@ streamlit
 cassandra-driver
 prophet
 xgboost
+statsmodels
+scikit-learn
