@@ -6,6 +6,11 @@ from xgboost import XGBRegressor
 from statsmodels.tsa.seasonal import seasonal_decompose
 import sklearn
 from statsmodels.tsa.statespace.sarimax import SARIMAX
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from pmdarima import auto_arima
+import matplotlib.pyplot as plt
+
 
 #def ChartGenSARIMAX(row):
 #    try:
@@ -20,12 +25,124 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 #        st.markdown("---")
 #    except Exception as e:
 #            st.error(f"SARIMAX unaccounted for exception: {e}")
+def ChartGenARIMA(row):
+
+    # Load data
+    compYearDataPD = pd.read_json(row.company_year)
+    series = compYearDataPD['Open']
+
+    # Subheader for the anlysis looks more nice on UI
+    st.subheader("ARIMA / SARIMA Analysis")
+
+    # ADF tests
+    result = adfuller(series)
+
+    st.write("ADF Statistic:", result[0])
+    st.write("p-value:", result[1])
+
+    # Differencing check from the ADF
+
+    # if fail to reject H₀
+    if result[1] > 0.05:
+        st.write("Series is non-stationary → applying differencing")
+        series_diff = series.diff().dropna()
+
+    #Else reject H₀
+    else:
+        st.write("Series is stationary")
+        series_diff = series
+
+    # Plot for more visual context
+    fig1, ax1 = plt.subplots()
+    ax1.plot(series_diff)
+    ax1.set_title("Differenced Series")
+    st.pyplot(fig1)
+
+    # ACF / PACF
+    st.write("ACF Plot")
+    st.pyplot(plot_acf(series_diff))
+
+    st.write("PACF Plot")
+    st.pyplot(plot_pacf(series_diff))
+
+    # AUTO ARIMA
+    auto_model = auto_arima(
+        series,
+        seasonal=True,
+        #stock are traded weekly mon-fri hence 5 selcted as seasonal period
+        m=5,
+        suppress_warnings=True
+    )
+
+    #Use for debug only, prints whole summary of SARIMAX ugly on UI
+    #st.text(auto_model.summary())
+
+    order = auto_model.order
+    seasonal_order = auto_model.seasonal_order
+    # SARIMAX
+    model = SARIMAX(
+        series,
+        order=order,
+        seasonal_order=seasonal_order
+    )
+
+    model_fit = model.fit()
+
+    st.subheader("SARIMAX Key Results")
+
+    #Create 3 columns for better visuals
+    col1, col2, col3 = st.columns(3)
+
+    # Showing key insights of SARIMAX
+    with col1:
+        order = model_fit.model.order
+        seasonal_order = model_fit.model.seasonal_order
+        st.metric("Order", f"{order}")
+    with col2:
+        st.metric("AIC", f"{model_fit.aic:.2f}")
+    with col3:
+        st.metric("BIC", f"{model_fit.bic:.2f}")
+
+    #Coefficients table
+    params = model_fit.params
+    pvalues = model_fit.pvalues
+
+    summary_df = pd.DataFrame({
+    "Coefficient": params,
+    "p-value": pvalues
+    })
+
+    st.write("### Coefficients")
+    st.dataframe(summary_df)
+    ssignificant = summary_df[summary_df["p-value"] < 0.05]
+    st.write("### Significant Terms (p < 0.05)")
+    st.dataframe(ssignificant)
+
+
+
+    # Use for debug only, prints whole summary of SARIMAX ugly on UI
+    #st.text(model_fit.summary())
+
+    # Forecast of the stocks
+    forecast = model_fit.forecast(steps=30)
+
+    fig2, ax2 = plt.subplots()
+    ax2.plot(series, label="Original")
+    ax2.plot(forecast, label="Forecast")
+    ax2.legend()
+    st.pyplot(fig2)
+
+    st.markdown("---")
 
 def ChartGenProphetXGB(row):
 
     # Load data
     compYearDataPD = pd.read_json(row.company_year)
     compOpenPrices = compYearDataPD[['Open']].copy()
+
+    # Subheader for the anlysis looks more nice on UI
+    #st.subheader("Prophet Analysis") Wrong place but we can look if it looks nicer with these
+
 
     # Prepare Prophet format
     compOpenPrices = compOpenPrices.rename(columns={'Open': 'y'})
@@ -53,6 +170,7 @@ def ChartGenProphetXGB(row):
         df_ml[["ds", "xgb_pred"]],
         on="ds",
         how="left"
+        
     )
 
     # Fill missing values (start of series)
