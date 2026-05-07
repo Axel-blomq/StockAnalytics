@@ -140,6 +140,15 @@ if st.button("Fetch Data"):
                 compInfoPD = pd.read_json(row.company_info)
                 name = compInfoPD[['longName']].iloc[0][0]
                 st.subheader(f"{name}")
+
+                compInfoPD = pd.read_json(row.company_info)
+
+                oppMargins = round(float(compInfoPD[['operatingMargins']].iloc[0][0]) * 100, 2)
+                grossMargins = round(float(compInfoPD[['grossMargins']].iloc[0][0]) * 100, 2)
+                dte = round(float(compInfoPD[['debtToEquity']].iloc[0][0]), 2)
+                
+                st.write(f"operating margins: {oppMargins}% | gross margins: {grossMargins}% | Debt to Equity ratio: {dte}%")
+
                 #decided to make the chart generation into a function for easier handling and more consistency across charts
                 #also passing the Cassandra session variable into them to not create duplicate connections (saves on ram)
                 chartGen.ChartGenARIMA(row)
@@ -149,13 +158,11 @@ if st.button("Fetch Data"):
                 chartGen.ChartGenProphetXGB(row)
 
                 chartGen.ChartGenSeasonal(row)
-
-                #chartGen.ChartGenSARIMAX(row)
             else:
                 st.error(f"{comp} does not exist in the Database.")
 
-        except ValueError:
-            st.error(f"{comp} exists in database, but has corrupt JSON data, skipping")
+        except ValueError as e:
+            st.error(f"{comp} exists in database, but has corrupt JSON data, skipping {e}")
         except KeyError:
             st.error(f"{comp} exists in database, but missing data, skipping")
         except Exception as e:

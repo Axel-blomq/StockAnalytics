@@ -203,15 +203,9 @@ def ChartGenProphetXGB(row):
     fig1 = model.plot(forecast_pd)
 
     # Company info
-    compInfoPD = pd.read_json(row.company_info)
-
-    oppMargins = round(float(compInfoPD[['operatingMargins']].iloc[0][0]) * 100, 2)
-    grossMargins = round(float(compInfoPD[['grossMargins']].iloc[0][0]) * 100, 2)
-    dte = round(float(compInfoPD[['debtToEquity']].iloc[0][0]), 2)
-
+   
     # Output
     st.pyplot(fig1)
-    st.write(f"operating margins: {oppMargins}% | gross margins: {grossMargins}% | Debt to Equity ratio: {dte}%")
     st.markdown("---")
 
         
@@ -237,18 +231,8 @@ def ChartGenProphet(row):
     forecast_pd = model.predict(future_pd)
     fig1 = model.plot(forecast_pd)
 
-    #find and show info about the company.
-    compInfoPD = pd.read_json(row.company_info)
-
-    name = compInfoPD[['longName']].iloc[0][0]
-
-    #convert some numbers into more readable percentages.
-    oppMargins =  round((float(compInfoPD[['operatingMargins']].iloc[0][0]) *100),2)
-    grossMargins = round((float(compInfoPD[['grossMargins']].iloc[0][0])*100),2)
-    dte = round(float(compInfoPD[['debtToEquity']].iloc[0][0]),2)
     #and write it all out for the user to see
-    st.pyplot(fig1) 
-    st.write(f"operating margins: {oppMargins}% | gross margins: {grossMargins}% | Debt to Equity ratio: {dte}%")
+    st.pyplot(fig1)
     st.markdown("---")
 
 def ChartGenSeasonal(row):
@@ -257,18 +241,18 @@ def ChartGenSeasonal(row):
     compYearDataPD = pd.read_json(row.company_year)
     compOpenPrices = compYearDataPD[['Open']]
     
-    #grab the volume of traded stocks (unimplemented)
+    #grab the volume of traded stocks
     compVolumes = compYearDataPD[['Volume']]
 
     #check if there is a yearly seasonality
     result = seasonal_decompose(compOpenPrices['Open'], model='additive', period=252)
     priceplot = result.plot()
-    result = seasonal_decompose(compVolumes['Volume'], model='additive', period=20)
+    result = seasonal_decompose(compVolumes['Volume'], model='additive', period=252)
     volplot = result.plot()
     st.subheader(f"Seasonality over a year in stock price (if any):")
     st.pyplot(priceplot)
     st.markdown("---")
-    st.subheader(f"Seasonality over a month in stock trade volume (if any):")
+    st.subheader(f"Seasonality over a year in stock trade volume (if any):")
     st.pyplot(volplot)
     st.markdown("---")
         
@@ -278,7 +262,5 @@ def ChartGenSeasonal(row):
 
 
 #TODO: ARIMA chart generator, P Q testing on ARIMA, 
-#TODO: check if stock is seasonal. |doing right now... will finish|
-#TODO: "trend decompose" chart generator |doing right now... will finish|
 #TODO: basis function for Arima, AIC score, SARIMA (seasonal).
 
