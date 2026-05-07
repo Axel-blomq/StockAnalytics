@@ -8,3 +8,4 @@ prophet
 xgboost
 statsmodels
 scikit-learn
+pmdarima
