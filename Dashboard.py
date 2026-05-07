@@ -137,7 +137,7 @@ if st.button("Fetch Data"):
 
             if row:
                 #decided to make the chart generation into a function for easier handling and more consistency across charts
-                #also passing the Cassandra session variable into them to not create duplicate connections (saves on ram)
+                
                 st.write("Prophet Prediction")
                 chartGen.ChartGenProphet(row)
                 st.write("Prophet with XGBoost")

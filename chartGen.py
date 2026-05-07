@@ -148,7 +148,7 @@ def ChartGenSeasonal(row):
     #check if there is a yearly seasonality
     result = seasonal_decompose(compOpenPrices['Open'], model='additive', period=252)
     priceplot = result.plot()
-    result = seasonal_decompose(compVolumes['Volume'], model='additive', period=20)
+    result = seasonal_decompose(compVolumes['Volume'], model='additive', period=252)
     volplot = result.plot()
     st.subheader(f"Seasonality over a year in stock price (if any):")
     st.pyplot(priceplot)
