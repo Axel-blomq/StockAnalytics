@@ -204,14 +204,12 @@ def ChartGenProphetXGB(row):
 
     # Company info
     compInfoPD = pd.read_json(row.company_info)
-    name = compInfoPD[['longName']].iloc[0][0]
 
     oppMargins = round(float(compInfoPD[['operatingMargins']].iloc[0][0]) * 100, 2)
     grossMargins = round(float(compInfoPD[['grossMargins']].iloc[0][0]) * 100, 2)
     dte = round(float(compInfoPD[['debtToEquity']].iloc[0][0]), 2)
 
     # Output
-    st.subheader(f"{name}")
     st.pyplot(fig1)
     st.write(f"operating margins: {oppMargins}% | gross margins: {grossMargins}% | Debt to Equity ratio: {dte}%")
     st.markdown("---")
@@ -249,7 +247,6 @@ def ChartGenProphet(row):
     grossMargins = round((float(compInfoPD[['grossMargins']].iloc[0][0])*100),2)
     dte = round(float(compInfoPD[['debtToEquity']].iloc[0][0]),2)
     #and write it all out for the user to see
-    st.subheader(f"{name}")
     st.pyplot(fig1) 
     st.write(f"operating margins: {oppMargins}% | gross margins: {grossMargins}% | Debt to Equity ratio: {dte}%")
     st.markdown("---")

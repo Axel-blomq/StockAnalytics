@@ -136,17 +136,20 @@ if st.button("Fetch Data"):
             row = session.execute(query, (comp,)).one()
 
             if row:
+
+                compInfoPD = pd.read_json(row.company_info)
+                name = compInfoPD[['longName']].iloc[0][0]
+                st.subheader(f"{name}")
                 #decided to make the chart generation into a function for easier handling and more consistency across charts
                 #also passing the Cassandra session variable into them to not create duplicate connections (saves on ram)
-                st.write("ARIMA / SARIMA")
                 chartGen.ChartGenARIMA(row)
-                st.write("Prophet Prediction")
+                st.subheader("Prophet Prediction")
                 chartGen.ChartGenProphet(row)
-                st.write("Prophet with XGBoost")
+                st.subheader("Prophet with XGBoost")
                 chartGen.ChartGenProphetXGB(row)
-                st.write("Yealy seasonality")
+
                 chartGen.ChartGenSeasonal(row)
-                st.write("SARIMAX data... none for now")
+
                 #chartGen.ChartGenSARIMAX(row)
             else:
                 st.error(f"{comp} does not exist in the Database.")
